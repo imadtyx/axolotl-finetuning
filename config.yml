@@ -1,0 +1,58 @@
+base_model: NousResearch/Meta-Llama-3-8B-Instruct
+model_type: LlamaForCausalLM
+tokenizer_type: AutoTokenizer
+
+load_in_8bit: true
+load_in_4bit: false
+
+# Using preprocessed data
+datasets:
+  - path: processed_data.jsonl
+    type: completion
+    format: jsonl
+    field: text
+    field_completion: completion
+
+dataset_prepared_path:
+val_set_size: 0.1
+output_dir: ./outputs/lora-helpfulness-comparison
+
+sequence_len: 1024
+sample_packing: false
+pad_to_sequence_len: true
+
+# LoRA configuration
+adapter: lora
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target_linear: true
+
+# Training parameters
+gradient_accumulation_steps: 4
+micro_batch_size: 2
+num_epochs: 3
+optimizer: adamw_bnb_8bit
+lr_scheduler: cosine
+learning_rate: 0.0002
+
+# Only train on completion (label)
+train_on_inputs: false
+group_by_length: true
+
+bf16: auto
+tf32: false
+gradient_checkpointing: true
+flash_attention: true
+
+logging_steps: 10
+warmup_steps: 10
+evals_per_epoch: 2
+saves_per_epoch: 1
+weight_decay: 0.0
+
+special_tokens:
+  pad_token: <|end_of_text|>
+
+# Add completion prompt for consistency
+completion_prompt: "\n"
